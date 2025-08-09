@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ADACA-API
+  datasource:
+    url: jdbc:h2:mem:sampledb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    defer-datasource-initialization: true
