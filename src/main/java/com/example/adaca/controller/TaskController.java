@@ -1,5 +1,6 @@
 package com.example.adaca.controller;
 
+import com.example.adaca.dto.TaskDTO;
 import com.example.adaca.model.Task;
 import com.example.adaca.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +18,25 @@ public class TaskController {
     private final TaskService taskService;
 
     @PostMapping("/{projectId}")
-    public ResponseEntity<Task> createTask(
+    public ResponseEntity<TaskDTO> create(
             @PathVariable Integer projectId,
-            @RequestBody Task task
+            @RequestBody TaskDTO taskDTO
     ) {
-        Task created = taskService.createOrUpdateTask(projectId, task);
-        return ResponseEntity.ok(created);
+        TaskDTO task = taskService.createTask(projectId, taskDTO);
+        return ResponseEntity.ok(task);
+    }
+
+    @PutMapping("/{projectId}")
+    public ResponseEntity<TaskDTO> update(
+            @PathVariable Integer projectId,
+            @RequestBody TaskDTO taskDTO
+    ) {
+        TaskDTO taskUpdate = taskService.updateTask(projectId, taskDTO);
+        return ResponseEntity.ok(taskUpdate);
     }
 
     @GetMapping("/{projectId}")
-    public Page<Task> getTasksByProject(
+    public Page<TaskDTO> getTasksByProject(
             @PathVariable Integer projectId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate endDate,

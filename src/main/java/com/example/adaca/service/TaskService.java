@@ -1,5 +1,6 @@
 package com.example.adaca.service;
 
+import com.example.adaca.dto.TaskDTO;
 import com.example.adaca.model.Project;
 import com.example.adaca.model.Task;
 import com.example.adaca.repository.TaskRepo;
@@ -22,32 +23,28 @@ public class TaskService {
     private final TaskExecutor taskExecutor;
     private final EmailService emailService;
 
-    @Transactional
-    public Task createOrUpdateTask(Integer projectId, Task task) {
-        Integer id = task.getId();
+    public TaskDTO createTask(Integer projectId, TaskDTO taskDTO) {
+        Task task = taskDTO.toTask();
 
-        Task finalTask;
+        task.setProject(Project.builder().projectId(projectId).build());
 
-        // create new
-        if (id == null) {
-            task.setProject(Project.builder().projectId(projectId).build());
-            finalTask =  taskRepo.save(task);
+        taskExecutor.execute(() -> emailService.sendEmail("New taskDTO assigned!", task));
 
-            taskExecutor.execute(() -> emailService.sendEmail("New task assigned!", finalTask));
-        } else {
-            // update status
-            Task updateTask = taskRepo.findById(id).orElseThrow();
-            updateTask.setStatus(task.getStatus());
-            finalTask = updateTask;
-
-            taskExecutor.execute(() -> emailService.sendEmail("Task updated!", finalTask));
-        }
-
-        System.out.println("Task commit!");
-        return finalTask;
+        return taskRepo.save(task).getTaskDTO();
     }
 
-    public Page<Task> getTasksByProject(Integer projectId, LocalDate startDate, LocalDate endDate, int page, int size, String sortBy) {
+    @Transactional
+    public TaskDTO updateTask(Integer projectId, TaskDTO taskDTO) {
+        Task updateTask = taskRepo.findById(taskDTO.getId()).orElseThrow();
+        updateTask.setProject(Project.builder().projectId(projectId).build());
+        updateTask.setStatus(taskDTO.getStatusId());
+
+        taskExecutor.execute(() -> emailService.sendEmail("Task updated!", updateTask));
+
+        return updateTask.getTaskDTO();
+    }
+
+    public Page<TaskDTO> getTasksByProject(Integer projectId, LocalDate startDate, LocalDate endDate, int page, int size, String sortBy) {
         // Default to current time if startDate is not provided
         if (startDate == null) {
             startDate = LocalDate.now();
@@ -58,6 +55,7 @@ public class TaskService {
             endDate = LocalDate.now().plusDays(7);
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
-        return taskRepo.findByProject_ProjectIdAndDueDateBetween(projectId, startDate, endDate, pageable);
+        return taskRepo.findByProject_ProjectIdAndDueDateBetween(projectId, startDate, endDate, pageable)
+                .map(Task::getTaskDTO);
     }
 }

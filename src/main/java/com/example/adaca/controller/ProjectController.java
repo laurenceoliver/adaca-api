@@ -1,9 +1,7 @@
 package com.example.adaca.controller;
 
 import com.example.adaca.model.Project;
-import com.example.adaca.model.Task;
 import com.example.adaca.service.ProjectService;
-import com.example.adaca.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

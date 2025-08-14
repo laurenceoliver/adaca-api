@@ -1,5 +1,6 @@
 package com.example.adaca.model;
 
+import com.example.adaca.dto.TaskDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,4 +37,16 @@ public class Task {
     private Project project;
 
     private Integer status; // 1:PENDING, 2:IN_PROGRESS, 3:COMPLETED
+
+    public TaskDTO getTaskDTO() {
+        return TaskDTO.builder()
+                .id(id)
+                .name(name)
+                .priority(priority)
+                .dueDate(dueDate)
+                .statusId(status)
+                .projectId(project.getProjectId())
+                .developerId(assignee.getDeveloperId())
+                .build();
+    }
 }
